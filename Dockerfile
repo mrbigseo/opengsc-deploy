@@ -6,10 +6,12 @@ RUN apk add --no-cache git python3 make g++ gcc libc6-compat
 
 WORKDIR /app
 # Клонируем оригинальный проект прямо во время сборки
-RUN git clone https://github.com/fenjo26/opengsc.git .
+RUN git clone --depth 1 https://github.com/fenjo26/opengsc.git .
 
-# Установка и сборка
-RUN npm ci --ignore-scripts
+# 🔧 ИСПРАВЛЕНИЕ: используем npm install вместо npm ci
+RUN npm install --legacy-peer-deps
+
+# Генерируем Prisma клиент и собираем Next.js
 RUN npx prisma generate
 RUN npm run build
 
