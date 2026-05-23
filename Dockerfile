@@ -33,7 +33,15 @@ COPY --from=builder /app/prisma ./prisma
 RUN mkdir -p /app/data && chown -R nextjs:nodejs /app/data
 
 # 🔑 Создаём правильный prisma.config.ts
-RUN echo 'import { defineConfig } from "prisma/config";\n\nexport default defineConfig({\n  datasource: {\n    url: process.env.DATABASE_URL,\n  },\n});' > /app/prisma.config.ts
+COPY <<EOF /app/prisma.config.ts
+import { defineConfig } from "prisma/config";
+
+export default defineConfig({
+  datasource: {
+    url: process.env.DATABASE_URL,
+  },
+});
+EOF
 
 USER nextjs
 EXPOSE 3000
