@@ -39,5 +39,5 @@ RUN mkdir -p /app/data && chown -R nextjs:nodejs /app/data
 USER nextjs
 EXPOSE 3000
 
-# 🔑 ИСПРАВЛЕННАЯ КОМАНДА — явно указываем хост и порт
-CMD ["node", "server.js", "-H", "0.0.0.0", "-p", "3000"]
+# 🔑 ИСПРАВЛЕННАЯ КОМАНДА
+CMD ["npx", "next", "start", "-H", "0.0.0.0", "-p", "3000"]
