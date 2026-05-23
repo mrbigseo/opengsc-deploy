@@ -7,10 +7,13 @@ RUN apk add --no-cache git python3 make g++ gcc libc6-compat
 WORKDIR /app
 RUN git clone --depth 1 https://github.com/fenjo26/opengsc.git .
 
-# 🔑 Устанавливаем зависимости БЕЗ --ignore-scripts
-RUN npm install --legacy-peer-deps
-
+# 🔑 1. Сначала задаём DATABASE_URL для Prisma
 ENV DATABASE_URL="file:/tmp/dev.db"
+
+# 🔑 2. Игнорируем скрипты при установке, чтобы избежать раннего prisma generate
+RUN npm install --ignore-scripts --legacy-peer-deps
+
+# 🔑 3. Явно запускаем prisma generate с уже заданной DATABASE_URL
 RUN npx prisma generate
 
 RUN npm run build
@@ -22,12 +25,11 @@ RUN apk add --no-cache libc6-compat
 
 WORKDIR /app
 
+# 🔑 КРИТИЧЕСКИ ВАЖНЫЕ ПЕРЕМЕННЫЕ
 ENV NODE_ENV=production
 ENV PORT=3000
 ENV HOST=0.0.0.0
 ENV DATABASE_URL=file:/app/data/prod.db
-
-# 🔑 Для NextAuth cookies
 ENV NEXTAUTH_URL=https://ogsc.bigseoonline.com
 
 RUN addgroup --system --gid 1001 nodejs && \
