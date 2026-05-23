@@ -7,15 +7,19 @@ RUN apk add --no-cache git python3 make g++ gcc libc6-compat
 WORKDIR /app
 RUN git clone --depth 1 https://github.com/fenjo26/opengsc.git .
 
-# 🔑 1. Сначала задаём DATABASE_URL для Prisma
+# 🔑 1. Задаём DATABASE_URL
 ENV DATABASE_URL="file:/tmp/dev.db"
 
-# 🔑 2. Игнорируем скрипты при установке, чтобы избежать раннего prisma generate
+# 🔑 2. Устанавливаем зависимости (игнорируем скрипты)
 RUN npm install --ignore-scripts --legacy-peer-deps
 
-# 🔑 3. Явно запускаем prisma generate с уже заданной DATABASE_URL
+# 🔑 3. Явно компилируем better-sqlite3
+RUN npm rebuild better-sqlite3
+
+# 🔑 4. Генерируем Prisma клиент
 RUN npx prisma generate
 
+# 🔑 5. Собираем Next.js
 RUN npm run build
 
 
