@@ -3,10 +3,11 @@
 # ============================
 # ЭТАП 1: СБОРКА
 # ============================
-FROM node:24-alpine AS builder
+# ИЗМЕНЕНИЕ: Меняем node:24-alpine на node:20-alpine (LTS версия)
+FROM node:20-alpine AS builder
 
 # Системные зависимости для компиляции native-модулей
-RUN apk add --no-cache git python3 make g++ gcc libc6-compat
+RUN apk add --no-cache git python3 make g++ gcc libc6-compat openssl
 
 WORKDIR /app
 
@@ -14,14 +15,13 @@ WORKDIR /app
 RUN git clone --depth 1 https://github.com/fenjo26/opengsc.git .
 
 # 🔑 КРИТИЧЕСКИ: задаём DATABASE_URL ДО npm install
-# Это нужно для prisma generate в postinstall скрипте
 ENV DATABASE_URL="file:/tmp/dev.db"
 
-# 🔑 Устанавливаем зависимости БЕЗ --ignore-scripts
-# better-sqlite3 скомпилируется автоматически
+# Устанавливаем зависимости
+# На Node 20 better-sqlite3 успешно скачает готовый бинарник или соберется
 RUN npm install --legacy-peer-deps
 
-# Явно генерируем Prisma клиент (на всякий случай)
+# Явно генерируем Prisma клиент
 RUN npx prisma generate
 
 # Собираем Next.js
@@ -31,13 +31,15 @@ RUN npm run build
 # ============================
 # ЭТАП 2: ПРОДАКШЕН
 # ============================
-FROM node:24-alpine AS runner
+# ИЗМЕНЕНИЕ: Меняем базовый образ здесь тоже
+FROM node:20-alpine AS runner
 
-RUN apk add --no-cache libc6-compat
+# ИЗМЕНЕНИЕ: Добавляем openssl, нужно для работы Prisma в продакшене
+RUN apk add --no-cache libc6-compat openssl
 
 WORKDIR /app
 
-# 🔑 ВСЕ необходимые переменные окружения
+# Переменные окружения
 ENV NODE_ENV=production
 ENV PORT=3000
 ENV HOST=0.0.0.0
@@ -63,5 +65,5 @@ USER nextjs
 
 EXPOSE 3000
 
-# 🔑 Запускаем приложение
+# Запускаем приложение
 CMD ["npx", "next", "start", "-H", "0.0.0.0", "-p", "3000"]
