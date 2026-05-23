@@ -16,7 +16,11 @@ RUN npm run build
 FROM node:24-alpine AS runner
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
-ENV NODE_ENV=production PORT=3000
+
+# 🔑 ГЛАВНОЕ ИЗМЕНЕНИЕ: DATABASE_URL как ENV
+ENV NODE_ENV=production
+ENV PORT=3000
+ENV DATABASE_URL=file:/app/data/prod.db
 
 RUN addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 nextjs
@@ -32,5 +36,5 @@ RUN mkdir -p /app/data && chown -R nextjs:nodejs /app/data
 USER nextjs
 EXPOSE 3000
 
-# 🔑 ИСПРАВЛЕННАЯ КОМАНДА (без создания .env файла)
-CMD ["sh", "-c", "export DATABASE_URL=file:/app/data/prod.db && npx prisma migrate deploy && npm start"]
+# 🔑 ЗАПУСКАЕМ ЧЕРЕЗ sh -c с правильной переменной
+CMD ["sh", "-c", "npx prisma migrate deploy && npm start"]
