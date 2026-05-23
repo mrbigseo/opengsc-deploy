@@ -17,7 +17,6 @@ FROM node:24-alpine AS runner
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
-# 🔑 ГЛАВНОЕ ИЗМЕНЕНИЕ: DATABASE_URL как ENV
 ENV NODE_ENV=production
 ENV PORT=3000
 ENV DATABASE_URL=file:/app/data/prod.db
@@ -33,8 +32,10 @@ COPY --from=builder /app/prisma ./prisma
 
 RUN mkdir -p /app/data && chown -R nextjs:nodejs /app/data
 
+# 🔑 Создаём правильный prisma.config.ts
+RUN echo 'import { defineConfig } from "prisma/config";\n\nexport default defineConfig({\n  datasource: {\n    url: process.env.DATABASE_URL,\n  },\n});' > /app/prisma.config.ts
+
 USER nextjs
 EXPOSE 3000
 
-# 🔑 ЗАПУСКАЕМ ЧЕРЕЗ sh -c с правильной переменной
 CMD ["sh", "-c", "npx prisma migrate deploy && npm start"]
