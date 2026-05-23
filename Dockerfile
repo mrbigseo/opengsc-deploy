@@ -32,5 +32,5 @@ RUN mkdir -p /app/data && chown -R nextjs:nodejs /app/data
 USER nextjs
 EXPOSE 3000
 
-# 🔑 ИСПРАВЛЕННАЯ СТРОКА ЗАПУСКА
-CMD ["sh", "-c", "mkdir -p /app/data && echo 'DATABASE_URL=file:/app/data/prod.db' > .env && npx prisma migrate deploy && npm start"]
+# 🔑 ИСПРАВЛЕННАЯ КОМАНДА (без создания .env файла)
+CMD ["sh", "-c", "export DATABASE_URL=file:/app/data/prod.db && npx prisma migrate deploy && npm start"]
