@@ -7,6 +7,9 @@ RUN apk add --no-cache git python3 make g++ gcc libc6-compat
 WORKDIR /app
 RUN git clone --depth 1 https://github.com/fenjo26/opengsc.git .
 
+# 🔑 Модифицируем next.config.js для standalone режима
+RUN sed -i 's/module.exports = {/module.exports = {\n  output: '\''standalone'\'',/' next.config.js
+
 RUN npm install --ignore-scripts --legacy-peer-deps
 
 ENV DATABASE_URL="file:/tmp/dev.db"
@@ -39,5 +42,5 @@ RUN mkdir -p /app/data && chown -R nextjs:nodejs /app/data
 USER nextjs
 EXPOSE 3000
 
-# 🔑 ИСПРАВЛЕННАЯ КОМАНДА
-CMD ["npx", "next", "start", "-H", "0.0.0.0", "-p", "3000"]
+# 🔑 Запускаем standalone сервер
+CMD ["node", ".next/standalone/server.js"]
