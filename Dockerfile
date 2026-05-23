@@ -21,7 +21,6 @@ RUN apk add --no-cache libc6-compat
 
 WORKDIR /app
 
-# 🔑 КРИТИЧЕСКИ ВАЖНЫЕ ПЕРЕМЕННЫЕ
 ENV NODE_ENV=production
 ENV PORT=3000
 ENV HOST=0.0.0.0
@@ -41,5 +40,5 @@ RUN mkdir -p /app/data && chown -R nextjs:nodejs /app/data
 USER nextjs
 EXPOSE 3000
 
-# 🔑 ПРОСТОЙ ЗАПУСК — Next.js сам разберётся с конфигом
-CMD ["npm", "start"]
+# 🔑 ИСПРАВЛЕННАЯ КОМАНДА — явно указываем хост
+CMD ["npx", "next", "start", "-H", "0.0.0.0", "-p", "3000"]
